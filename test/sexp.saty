@@ -25,6 +25,21 @@ let _ = (
 let s6 = `(this (is not) (an s-expression` |> SExp.read-from-string atom
 let _ = Option.unwrap-none s6
 
+let s7 = SExp.of-atom (SExp-StdAtom.of-string `some string`)
+let _ = info-value `s7` (SExp.to-string atom s7)
+
+let s8 = SExp.of-atom (SExp-StdAtom.of-string `string containing "escape \ characters"`)
+let _ = info-value `s8` (SExp.to-string atom s8)
+
+let s9 = SExp.(of-list [s2; s7; s8; of-list []])
+let _ = info-value `s9` (SExp.to-string atom s9)
+
+let s10 = `(this (is an) (s-expression with "string") "and \"string\"")` |> SExp.read-from-string atom
+let _ = (
+  let s = Option.unwrap s10 in
+  info-value `s10` (SExp.to-string atom s)
+)
+
 in
 
 document ()

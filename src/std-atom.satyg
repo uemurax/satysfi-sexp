@@ -10,44 +10,86 @@ module SExp-StdAtom : sig
 type t
 
 val of-symbol : string -> t
+val of-string : string -> t
 val atom : t SExp-Atom.t
 
 end = struct
 
 type t =
 | Symbol of string
+| String of string
 
 let sp = String.of-char (Char.space)
 
-let symbol-head = RegExp.alpha
-let symbol-char = RegExp.(choice [symbol-head; digit; oneof `-_`])
-let symbol-re = RegExp.(sequence [bof; symbol-head; many symbol-char; eof])
+let symbol-head-re = RegExp.alpha
+let symbol-char-re = RegExp.(choice [symbol-head-re; digit; oneof `-_`])
+let symbol-re = RegExp.(sequence [bof; symbol-head-re; many symbol-char-re; eof])
 
 let of-symbol str =
 if RegExp.test symbol-re str then Symbol str
 else panic String.(concat [`Invalid symbol name:`; sp; str])
 
+let of-string str = String str
+
 let test-char re ch = RegExp.test re (String.of-char ch)
+
+let str-escape-char = Char.make `\ `
+let str-delim-char = Char.make `"`
+let str-escape-re = RegExp.char str-escape-char
+let str-delim-re = RegExp.char str-delim-char
+let str-escaped-re = RegExp.(choice [str-escape-re; str-delim-re])
+
+let escape-1 ch =
+if test-char str-escaped-re ch then (
+  String.of-list [str-escape-char; ch]
+) else String.of-char ch
 
 let to-string a =
 match a with
 | Symbol str -> str
+| String str -> String.(
+  concat [
+    of-char str-delim-char;
+    to-list str
+    |> List.map escape-1
+    |> concat;
+    of-char str-delim-char;
+  ]
+)
 
 let-rec read-symbol acc ch-l =
 let fallback _ = Option.some (of-symbol acc, ch-l) in
 match ch-l with
 | [] -> fallback ()
 | ch :: ch-l1 -> (
-  if test-char symbol-char ch then (
+  if test-char symbol-char-re ch then (
     read-symbol String.(append acc (of-char ch)) ch-l1
   ) else fallback ()
+)
+
+let-rec read-string acc ch-l =
+match ch-l with
+| [] -> Option.none
+| ch :: ch-l1 -> (
+  if test-char str-delim-re ch then (
+    Option.some (of-string acc, ch-l1)
+  ) else (
+    let cont ch1 ch-l2 = read-string String.(append acc (of-char ch1)) ch-l2 in
+    if test-char str-escape-re ch then (
+      match ch-l1 with
+      | [] -> Option.none
+      | ch1 :: ch-l2 -> cont ch1 ch-l2
+    ) else cont ch ch-l1
+  )
 )
 
 let read ch-l =
 match ch-l with
 | [] -> Option.none
 | ch :: ch-l1 -> (
-  if test-char symbol-head ch then (
+  if test-char str-delim-re ch then (
+    read-string String.empty ch-l1
+  ) else if test-char symbol-head-re ch then (
     read-symbol (String.of-char ch) ch-l1
   ) else (
     Option.none
