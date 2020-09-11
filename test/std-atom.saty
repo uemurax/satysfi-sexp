@@ -1,6 +1,8 @@
 @require: zrbase/zmtdoc0
 @require: base/string
+@require: base/char
 @require: base/option-ext
+@require: base/eq
 
 @import: ../src/atom
 @import: ../src/std-atom
@@ -25,8 +27,8 @@ let _ = (
   info-value `to-string s4` (SExp-Atom.to-string atom s)
 )
 
-let s5 = String.to-list `5-invalid-name` |> SExp-Atom.read atom
-let _ = Option.unwrap-none s5
+% let s5 = String.to-list `5-invalid-name` |> SExp-Atom.read atom
+% let _ = Option.unwrap-none s5
 
 let s6 = String.to-list `symbol1 symbol2` |> SExp-Atom.read atom
 let _ = (
@@ -34,6 +36,26 @@ let _ = (
   let _ = info-value `to-string s6` (SExp-Atom.to-string atom s) in
   info-value `ch-l6` (String.of-list ch-l)
 )
+
+let convert-test x = (
+  SExp-Atom.(to-string atom x |> String.to-list |> read atom)
+  |> Option.map-or false (fun (y, ch-l) -> (
+    Eq.equal (SExp-StdAtom.eq) y x
+    && Eq.equal (List.eq Char.eq) ch-l []
+  ))
+)
+
+let s7 = SExp-StdAtom.of-symbol `super-symbol`
+let _ = info-value `convert-test s7` (show-bool (convert-test s7))
+
+let s8 = SExp-StdAtom.of-string `some "supe \string"`
+let _ = info-value `convert-test s8` (show-bool (convert-test s8))
+
+let s9 = SExp-StdAtom.of-int 334
+let _ = info-value `convert-test s9` (show-bool (convert-test s9))
+
+let s10 = SExp-StdAtom.of-int (-123049586)
+let _ = info-value `convert-test s10` (show-bool (convert-test s10))
 
 in
 

@@ -4,6 +4,7 @@ module SExp-Atom : sig
 
 type 'a t
 
+% `read (String.to-list (to-string x))` is required to be `Some (x, [])`
 val make : (|
   to-string : 'a -> string;
   read : Char.t list -> ('a * Char.t list) option;

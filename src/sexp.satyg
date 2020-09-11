@@ -1,14 +1,18 @@
+@require: base/base
 @require: base/list-ext
 @require: base/string
 @require: base/char
 @require: base/option-ext
 @require: base/tuple
+@require: base/eq
 
 @import: atom
 
 module SExp : sig
 
 type 'a t
+
+val eq : ('a Eq.t) implicit -> (('a t) Eq.t) implicit
 
 val of-atom : 'a -> 'a t
 val of-list : ('a t) list -> 'a t
@@ -21,6 +25,16 @@ end = struct
 type 'a t =
 | Atom of 'a
 | List of ('a t) list
+
+let-rec
+equal e sexp1 sexp2 =
+match (sexp1, sexp2) with
+| (Atom x1, Atom x2) -> Eq.equal e x1 x2
+| (List s-l1, List s-l2) -> Eq.equal (List.eq (eq e)) s-l1 s-l2
+| _ -> false
+
+and
+eq e = Eq.make (equal e)
 
 let of-atom x = Atom x
 let of-list ls = List ls

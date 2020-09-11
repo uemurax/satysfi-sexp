@@ -55,6 +55,33 @@ let _ = (
 let s14 = `-` |> SExp.read-from-string atom
 let _ = Option.unwrap-none s14
 
+let convert-test x = (
+  SExp.(to-string atom x |> String.to-list |> read atom)
+  |> Option.map-or false (fun (y, ch-l) -> (
+    Eq.equal (SExp.eq SExp-StdAtom.eq) y x
+    && Eq.equal (List.eq Char.eq) ch-l []
+  ))
+)
+
+let s15 = SExp.(
+  of-list [
+    of-atom (SExp-StdAtom.of-symbol `this`);
+    of-list [
+      of-atom (SExp-StdAtom.of-string `is`);
+      of-atom (SExp-StdAtom.of-int (-1));
+    ];
+    of-list [
+      of-atom (SExp-StdAtom.of-symbol `s-expression`);
+      of-list [
+        of-atom (SExp-StdAtom.of-int 34029);
+        of-list [
+        ];
+      ];
+    ];
+  ]
+)
+let _ = info-value `convert-test s15` (show-bool (convert-test s15))
+
 in
 
 document ()

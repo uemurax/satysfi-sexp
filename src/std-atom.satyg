@@ -2,6 +2,8 @@
 @require: base/option-ext
 @require: base/string
 @require: base/regexp
+@require: base/eq
+@require: base/int
 
 @import: atom
 
@@ -9,10 +11,16 @@ module SExp-StdAtom : sig
 
 type t
 
+val eq : (t Eq.t) implicit
+
+% symbol = [A-Za-z][A-Za-z0-9-_]*
 val of-symbol : string -> t
+% string delimiter is `"`, and escape character is `\`
 val of-string : string -> t
+% int = -?[0-9]+
 val of-int : int -> t
 val atom : t SExp-Atom.t
+val equal : t -> t -> bool
 
 end = struct
 
@@ -20,6 +28,15 @@ type t =
 | Symbol of string
 | String of string
 | Int of int
+
+let equal x1 x2 =
+match (x1, x2) with
+| (Symbol str1, Symbol str2) -> String.equal str1 str2
+| (String str1, String str2) -> String.equal str1 str2
+| (Int n1, Int n2) -> Int.equal n1 n2
+| _ -> false
+
+let eq = Eq.make equal
 
 let sp = String.of-char (Char.space)
 
