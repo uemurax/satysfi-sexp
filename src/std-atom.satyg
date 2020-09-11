@@ -20,6 +20,11 @@ val of-symbol : string -> t
 val of-string : string -> t
 % int = -?[0-9]+
 val of-int : int -> t
+val case : (|
+  symbol : string -> 'a;
+  string : string -> 'a;
+  int : int -> 'a;
+|) -> t -> 'a
 val equal : t -> t -> bool
 
 end = struct
@@ -28,6 +33,12 @@ type t =
 | Symbol of string
 | String of string
 | Int of int
+
+let case rec x =
+match x with
+| Symbol str -> rec#symbol str
+| String str -> rec#string str
+| Int n -> rec#int n
 
 let equal x1 x2 =
 match (x1, x2) with

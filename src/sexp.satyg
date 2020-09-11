@@ -16,6 +16,8 @@ val eq : ('a Eq.t) implicit -> (('a t) Eq.t) implicit
 
 val of-atom : 'a -> 'a t
 val of-list : ('a t) list -> 'a t
+val case : ('a -> 'b) -> (('a t) list -> 'b) -> 'a t -> 'b
+val fold : ('a -> 'b) -> ('b list -> 'b) -> 'a t -> 'b
 val to-string : ('a SExp-Atom.t) implicit -> 'a t -> string
 val read : ('a SExp-Atom.t) implicit -> Char.t list -> ('a t * Char.t list) option
 val read-from-string : ('a SExp-Atom.t) implicit -> string -> ('a t) option
@@ -38,6 +40,13 @@ eq e = Eq.make (equal e)
 
 let of-atom x = Atom x
 let of-list ls = List ls
+
+let case fa fl sexp =
+match sexp with
+| Atom x -> fa x
+| List s-l -> fl s-l
+
+let-rec fold fa fl sexp = case fa (fun s-l -> fl (List.map (fold fa fl) s-l)) sexp
 
 let space = String.of-char Char.space
 
