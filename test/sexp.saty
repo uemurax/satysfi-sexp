@@ -40,6 +40,21 @@ let _ = (
   info-value `s10` (SExp.to-string atom s)
 )
 
+let s11 = SExp.of-atom (SExp-StdAtom.of-int 2)
+let _ = info-value `s11` (SExp.to-string atom s11)
+
+let s12 = SExp.of-atom (SExp-StdAtom.of-int (-21))
+let _ = info-value `s12` (SExp.to-string atom s12)
+
+let s13 = `(this (is an) (s-expression with 334) int -512)` |> SExp.read-from-string atom
+let _ = (
+  let s = Option.unwrap s13 in
+  info-value `s13` (SExp.to-string atom s)
+)
+
+let s14 = `-` |> SExp.read-from-string atom
+let _ = Option.unwrap-none s14
+
 in
 
 document ()

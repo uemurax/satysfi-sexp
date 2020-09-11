@@ -11,6 +11,7 @@ type t
 
 val of-symbol : string -> t
 val of-string : string -> t
+val of-int : int -> t
 val atom : t SExp-Atom.t
 
 end = struct
@@ -18,6 +19,7 @@ end = struct
 type t =
 | Symbol of string
 | String of string
+| Int of int
 
 let sp = String.of-char (Char.space)
 
@@ -30,6 +32,7 @@ if RegExp.test symbol-re str then Symbol str
 else panic String.(concat [`Invalid symbol name:`; sp; str])
 
 let of-string str = String str
+let of-int n = Int n
 
 let test-char re ch = RegExp.test re (String.of-char ch)
 
@@ -44,6 +47,10 @@ if test-char str-escaped-re ch then (
   String.of-list [str-escape-char; ch]
 ) else String.of-char ch
 
+let int-char-re = RegExp.digit
+let int-neg-re = RegExp.char (Char.make `-`)
+let int-head-re = RegExp.(choice [int-char-re; int-neg-re])
+
 let to-string a =
 match a with
 | Symbol str -> str
@@ -56,6 +63,7 @@ match a with
     of-char str-delim-char;
   ]
 )
+| Int n -> arabic n
 
 let-rec read-symbol acc ch-l =
 let fallback _ = Option.some (of-symbol acc, ch-l) in
@@ -83,12 +91,35 @@ match ch-l with
   )
 )
 
+let digit = `0123456789`
+let dec = 10
+
+let-rec read-int sgn acc ch-l =
+let fallback _ = acc |> Option.map (fun n -> (of-int (sgn * n), ch-l)) in
+match ch-l with
+| [] -> fallback ()
+| ch :: ch-l1 -> (
+  String.index ch digit
+  |> Option.map-or-else fallback (fun i -> (
+    let acc1 = (
+      acc
+      |> Option.map-or i (fun n -> dec * n + i)
+      |> Option.some
+    ) in
+    read-int sgn acc1 ch-l1
+  ))
+)
+
 let read ch-l =
 match ch-l with
 | [] -> Option.none
 | ch :: ch-l1 -> (
   if test-char str-delim-re ch then (
     read-string String.empty ch-l1
+  ) else if test-char int-char-re ch then (
+    read-int 1 Option.none ch-l
+  ) else if test-char int-neg-re ch then (
+    read-int (-1) Option.none ch-l1
   ) else if test-char symbol-head-re ch then (
     read-symbol (String.of-char ch) ch-l1
   ) else (
