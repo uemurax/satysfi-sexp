@@ -16,9 +16,9 @@ val eq : ('a Eq.t) implicit -> (('a t) Eq.t) implicit
 
 val of-atom : 'a -> 'a t
 val of-list : ('a t) list -> 'a t
-val to-string : 'a SExp-Atom.t -> 'a t -> string
-val read : 'a SExp-Atom.t -> Char.t list -> ('a t * Char.t list) option
-val read-from-string : 'a SExp-Atom.t -> string -> ('a t) option
+val to-string : ('a SExp-Atom.t) implicit -> 'a t -> string
+val read : ('a SExp-Atom.t) implicit -> Char.t list -> ('a t * Char.t list) option
+val read-from-string : ('a SExp-Atom.t) implicit -> string -> ('a t) option
 
 end = struct
 

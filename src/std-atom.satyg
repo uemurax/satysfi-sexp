@@ -12,6 +12,7 @@ module SExp-StdAtom : sig
 type t
 
 val eq : (t Eq.t) implicit
+val atom : (t SExp-Atom.t) implicit
 
 % symbol = [A-Za-z][A-Za-z0-9-_]*
 val of-symbol : string -> t
@@ -19,7 +20,6 @@ val of-symbol : string -> t
 val of-string : string -> t
 % int = -?[0-9]+
 val of-int : int -> t
-val atom : t SExp-Atom.t
 val equal : t -> t -> bool
 
 end = struct
