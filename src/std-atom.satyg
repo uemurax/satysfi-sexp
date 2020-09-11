@@ -1,0 +1,62 @@
+@require: base/base
+@require: base/option-ext
+@require: base/string
+@require: base/regexp
+
+@import: atom
+
+module SExp-StdAtom : sig
+
+type t
+
+val of-symbol : string -> t
+val atom : t SExp-Atom.t
+
+end = struct
+
+type t =
+| Symbol of string
+
+let sp = String.of-char (Char.space)
+
+let symbol-head = RegExp.alpha
+let symbol-char = RegExp.(choice [symbol-head; digit; oneof `-_`])
+let symbol-re = RegExp.(sequence [bof; symbol-head; many symbol-char; eof])
+
+let of-symbol str =
+if RegExp.test symbol-re str then Symbol str
+else panic String.(concat [`Invalid symbol name:`; sp; str])
+
+let test-char re ch = RegExp.test re (String.of-char ch)
+
+let to-string a =
+match a with
+| Symbol str -> str
+
+let-rec read-symbol acc ch-l =
+let fallback _ = Option.some (of-symbol acc, ch-l) in
+match ch-l with
+| [] -> fallback ()
+| ch :: ch-l1 -> (
+  if test-char symbol-char ch then (
+    read-symbol String.(append acc (of-char ch)) ch-l1
+  ) else fallback ()
+)
+
+let read ch-l =
+match ch-l with
+| [] -> Option.none
+| ch :: ch-l1 -> (
+  if test-char symbol-head ch then (
+    read-symbol (String.of-char ch) ch-l1
+  ) else (
+    Option.none
+  )
+)
+
+let atom = SExp-Atom.make (|
+  to-string = to-string;
+  read = read;
+|)
+
+end

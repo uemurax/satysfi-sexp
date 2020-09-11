@@ -1,0 +1,95 @@
+@require: base/list-ext
+@require: base/string
+@require: base/char
+@require: base/option-ext
+@require: base/tuple
+
+@import: atom
+
+module SExp : sig
+
+type 'a t
+
+val of-atom : 'a -> 'a t
+val of-list : ('a t) list -> 'a t
+val to-string : 'a SExp-Atom.t -> 'a t -> string
+val read : 'a SExp-Atom.t -> Char.t list -> ('a t * Char.t list) option
+val read-from-string : 'a SExp-Atom.t -> string -> ('a t) option
+
+end = struct
+
+type 'a t =
+| Atom of 'a
+| List of ('a t) list
+
+let of-atom x = Atom x
+let of-list ls = List ls
+
+let space = String.of-char Char.space
+
+let list-to-string str-l =
+let str1 = (
+  match str-l with
+  | [] -> String.empty
+  | str :: str-l -> (
+    List.fold-left (fun x y -> String.concat [x; space; y]) str str-l
+  )
+) in
+String.concat [`(`; str1; `)`]
+
+let-rec to-string atom sexp =
+match sexp with
+| Atom x -> SExp-Atom.to-string atom x
+| List sexp-l -> (
+  sexp-l
+  |> List.map (to-string atom)
+  |> list-to-string
+)
+
+let read-atom atom ch-l =
+SExp-Atom.read atom ch-l
+|> Option.map (fun (x, ch-l1) -> (of-atom x, ch-l1))
+
+let-rec skip-space ch-l =
+match ch-l with
+| [] -> []
+| ch :: ch-l1 -> (
+  if Char.is-space ch then skip-space ch-l1
+  else ch-l
+)
+
+let list-begin = Char.make `(`
+let list-end = Char.make `)`
+
+let-rec
+read atom ch-l =
+let ch-l1 = skip-space ch-l in
+match ch-l1 with
+| [] -> Option.none
+| ch :: ch-l2 -> (
+  if Char.equal ch list-begin then read-list [] atom ch-l2
+  else read-atom atom ch-l1
+)
+
+and
+read-list acc atom ch-l =
+let ch-l1 = skip-space ch-l in
+match ch-l1 with
+| [] -> Option.none
+| ch :: ch-l2 -> (
+  if Char.equal ch list-end then (
+    Option.some (of-list (List.reverse acc), ch-l2)
+  ) else (
+    read atom ch-l1
+    |> Option.and-then (fun (sexp, ch-l3) -> (
+      read-list (sexp :: acc) atom ch-l3
+    ))
+  )
+)
+
+let read-from-string atom str =
+String.to-list str
+|> read atom
+|> Option.map Pair.fst
+
+end

@@ -1,0 +1,7 @@
+@require: zrbase/zlog0
+@require: base/string
+@require: base/char
+
+let info-value =
+let sp = String.of-char Char.space in
+fun name v -> ZLog0.info (String.concat [name; sp; `=`; sp; v])

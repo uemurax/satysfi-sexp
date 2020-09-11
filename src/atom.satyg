@@ -1,0 +1,26 @@
+@require: base/char
+
+module SExp-Atom : sig
+
+type 'a t
+
+val make : (|
+  to-string : 'a -> string;
+  read : Char.t list -> ('a * Char.t list) option;
+|) -> 'a t
+val to-string : 'a t -> 'a -> string
+val read : 'a t -> Char.t list -> ('a * Char.t list) option
+
+end = struct
+
+type char = Char.t
+type 'a t = (|
+  to-string : 'a -> string;
+  read : char list -> ('a * char list) option;
+|)
+
+let make rec = rec
+let to-string atom = atom#to-string
+let read atom = atom#read
+
+end

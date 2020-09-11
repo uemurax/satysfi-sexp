@@ -1,0 +1,30 @@
+@require: zrbase/zmtdoc0
+@require: base/string
+@require: base/option-ext
+
+@import: ../src/sexp
+@import: ../src/std-atom
+
+@import: log
+
+let atom = SExp-StdAtom.atom
+
+let s1 = SExp.of-atom (SExp-StdAtom.of-symbol `symbol`)
+let _ = info-value `s1` (SExp.to-string atom s1)
+
+let s2 = SExp.of-atom (SExp-StdAtom.of-symbol `symbol-2`)
+let s3 = SExp.of-atom (SExp-StdAtom.of-symbol `symbol-3`)
+let s4 = SExp.(of-list [s1; of-list [s2; s2; s3]])
+let _ = info-value `s4` (SExp.to-string atom s4)
+
+let s5 = `(this (is an) (s-expression))` |> SExp.read-from-string atom
+let _ = (
+  let s = Option.unwrap s5 in
+  info-value `s5` (SExp.to-string atom s)
+)
+let s6 = `(this (is not) (an s-expression` |> SExp.read-from-string atom
+let _ = Option.unwrap-none s6
+
+in
+
+document ()

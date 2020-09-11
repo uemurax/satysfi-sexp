@@ -1,0 +1,40 @@
+@require: zrbase/zmtdoc0
+@require: base/string
+@require: base/option-ext
+
+@import: ../src/atom
+@import: ../src/std-atom
+
+@import: log
+
+let atom = SExp-StdAtom.atom
+
+let s1 = SExp-StdAtom.of-symbol `abc`
+let _ = info-value `to-string s1` (SExp-Atom.to-string atom s1)
+
+let s2 = SExp-StdAtom.of-symbol `some-SYMBOL_name-4-2`
+let _ = info-value `to-string s2` (SExp-Atom.to-string atom s2)
+
+% raise error
+% let s3 = SExp-StdAtom.of-symbol `wrong symbol`
+% let s3 = SExp-StdAtom.of-symbol `0abc`
+
+let s4 = String.to-list `symbol-name` |> SExp-Atom.read atom
+let _ = (
+  let (s, _) = Option.unwrap s4 in
+  info-value `to-string s4` (SExp-Atom.to-string atom s)
+)
+
+let s5 = String.to-list `5-invalid-name` |> SExp-Atom.read atom
+let _ = Option.unwrap-none s5
+
+let s6 = String.to-list `symbol1 symbol2` |> SExp-Atom.read atom
+let _ = (
+  let (s, ch-l) = Option.unwrap s6 in
+  let _ = info-value `to-string s6` (SExp-Atom.to-string atom s) in
+  info-value `ch-l6` (String.of-list ch-l)
+)
+
+in
+
+document ()
