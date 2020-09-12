@@ -21,7 +21,7 @@ depends: [
 build: [ ]
 install: [
   ["satyrographos" "opam" "install"
-   "--name" "sexp"
-   "--prefix" "%{prefix}%"
-   "--script" "%{build}%/Satyristes"]
+   "-name" "sexp"
+   "-prefix" "%{prefix}%"
+   "-script" "%{build}%/Satyristes"]
 ]
