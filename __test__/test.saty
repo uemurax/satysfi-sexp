@@ -1,0 +1,83 @@
+@require: base/base
+@require: base/string
+@require: base/char
+@require: base/option-ext
+@require: base/eq
+
+@import: ../src/sexp
+@import: ../src/std-atom
+
+let sp = String.of-char Char.space
+let log s = display-message String.(concat [`[INFO]`; sp; s])
+let log-value name v = log String.(concat [name; sp; `=`; sp; v])
+
+let test-bool name b =
+if b then ()
+else panic String.(concat [name; sp; `failed`])
+
+let _ = log `========SExp-StdAtom========`
+let atom = SExp-StdAtom.atom
+let eq = SExp-StdAtom.eq
+let s1 = SExp-StdAtom.of-symbol `abc`
+let _ = log-value `s1` (SExp-Atom.to-string atom s1)
+let s2 = SExp-StdAtom.of-symbol `some-SYMBOL_name-4-2`
+let _ = log-value `s2` (SExp-Atom.to-string atom s2)
+let (s3, ch-l3) = String.to-list `symbol-name-1 symbol-name-2` |> SExp-Atom.read atom |> Option.unwrap
+let _ = log-value `s3` (SExp-Atom.to-string atom s3)
+let _ = log-value `ch-l3` (String.of-list ch-l3)
+let s4 = SExp-StdAtom.of-symbol `super-symbol`
+let _ = test-bool `inversion test 4` (SExp-Atom.test atom eq s4)
+let s5 = SExp-StdAtom.of-string `some "super \"string\""`
+let _ = test-bool `inversion test 5` (SExp-Atom.test atom eq s5)
+let s6 = SExp-StdAtom.of-int 334
+let _ = log-value `s6` (SExp-Atom.to-string atom s6)
+let _ = test-bool `inversion test 6` (SExp-Atom.test atom eq s6)
+let s7 = SExp-StdAtom.of-int (-13209542)
+let _ = log-value `s7` (SExp-Atom.to-string atom s7)
+let _ = test-bool `inversion test 7` (SExp-Atom.test atom eq s7)
+
+let _ = log `========SExp========`
+let s8 = SExp.of-atom (SExp-StdAtom.of-symbol `symbol-1`)
+let _ = log-value `s8` (SExp.to-string atom s8)
+let s9 = SExp.(of-list [s8; of-list [of-atom (SExp-StdAtom.of-string `strin"g"`); of-atom (SExp-StdAtom.of-int (-334))]])
+let _ = log-value `s9` (SExp.to-string atom s9)
+let s10 = `(this (is "an") (S-expression 309 -334 "\"!\\!\""))` |> SExp.read-from-string atom |> Option.unwrap
+let _ = log-value `s10` (SExp.to-string atom s10)
+let _ = `(this (is not) (an S-expressio` |> SExp.read-from-string atom |> Option.unwrap-none
+let inversion-test sexp = (
+  SExp.(to-string atom sexp |> read-from-string atom)
+  |> Option.map-or false (fun x -> Eq.equal (SExp.eq eq) x sexp)
+)
+let s11 = SExp.(
+  of-list [
+    of-atom (SExp-StdAtom.of-symbol `this`);
+    of-list [
+      of-atom (SExp-StdAtom.of-string `is`);
+      of-atom (SExp-StdAtom.of-int (-1));
+    ];
+    of-list [
+      of-atom (SExp-StdAtom.of-symbol `s-expression`);
+      of-list [
+        of-atom (SExp-StdAtom.of-int 34029);
+        of-list [
+        ];
+      ];
+    ];
+  ]
+)
+let _ = test-bool `inversion test 11` (inversion-test s11)
+
+in
+
+page-break A4Paper
+(fun _ -> (|
+  text-origin = (0pt, 0pt);
+  text-height = 630pt;
+|))
+(fun _ -> (|
+  header-origin = (0pt, 0pt);
+  header-content = block-nil;
+  footer-origin = (0pt, 0pt);
+  footer-content = block-nil;
+|))
+block-nil
