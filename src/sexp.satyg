@@ -50,6 +50,9 @@ let-rec fold fa fl sexp = case fa (fun s-l -> fl (List.map (fold fa fl) s-l)) se
 
 let space = String.of-char Char.space
 
+let list-begin = Char.make `(`
+let list-end = Char.make `)`
+
 let list-to-string str-l =
 let str1 = (
   match str-l with
@@ -58,7 +61,7 @@ let str1 = (
     List.fold-left (fun x y -> String.concat [x; space; y]) str str-l
   )
 ) in
-String.concat [`(`; str1; `)`]
+String.(concat [of-char list-begin; str1; of-char list-end])
 
 let-rec to-string atom sexp =
 match sexp with
@@ -80,9 +83,6 @@ match ch-l with
   if Char.is-space ch then skip-space ch-l1
   else ch-l
 )
-
-let list-begin = Char.make `(`
-let list-end = Char.make `)`
 
 let-rec
 read atom ch-l =

@@ -1,3 +1,4 @@
+@require: base/base
 @require: base/char
 
 module SExp-Atom : sig
@@ -9,8 +10,8 @@ val make : (|
   to-string : 'a -> string;
   read : Char.t list -> ('a * Char.t list) option;
 |) -> 'a t
-val to-string : 'a t -> 'a -> string
-val read : 'a t -> Char.t list -> ('a * Char.t list) option
+val to-string : ('a t) implicit -> 'a -> string
+val read : ('a t) implicit -> Char.t list -> ('a * Char.t list) option
 
 end = struct
 
