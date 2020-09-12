@@ -1,5 +1,9 @@
 @require: base/base
 @require: base/char
+@require: base/eq
+@require: base/string
+@require: base/list-ext
+@require: base/option-ext
 
 module SExp-Atom : sig
 
@@ -13,6 +17,9 @@ val make : (|
 val to-string : ('a t) implicit -> 'a -> string
 val read : ('a t) implicit -> Char.t list -> ('a * Char.t list) option
 
+% Test if `read (String.to-list (to-string x)) == Some (x, [])`
+val test : ('a t) implicit -> ('a Eq.t) implicit -> 'a -> bool
+
 end = struct
 
 type char = Char.t
@@ -24,5 +31,14 @@ type 'a t = (|
 let make rec = rec
 let to-string atom = atom#to-string
 let read atom = atom#read
+
+let test atom eq x =
+to-string atom x
+|> String.to-list
+|> read atom
+|> Option.map-or false (fun (y, ch-l) -> (
+  Eq.equal eq y x
+  && Eq.equal (List.eq Char.eq) ch-l []
+))
 
 end

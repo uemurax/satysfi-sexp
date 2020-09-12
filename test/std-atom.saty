@@ -37,25 +37,24 @@ let _ = (
   info-value `ch-l6` (String.of-list ch-l)
 )
 
-let convert-test x = (
-  SExp-Atom.(to-string atom x |> String.to-list |> read atom)
-  |> Option.map-or false (fun (y, ch-l) -> (
-    Eq.equal (SExp-StdAtom.eq) y x
-    && Eq.equal (List.eq Char.eq) ch-l []
-  ))
-)
+let sp = String.of-char Char.space
+
+let convert-test name x =
+let s = String.concat [`convert-test`; sp; name] in
+if SExp-Atom.test atom SExp-StdAtom.eq x then info-value s `true`
+else panic String.(concat [s; sp; `failed`])
 
 let s7 = SExp-StdAtom.of-symbol `super-symbol`
-let _ = info-value `convert-test s7` (show-bool (convert-test s7))
+let _ = convert-test `s7` s7
 
 let s8 = SExp-StdAtom.of-string `some "supe \string"`
-let _ = info-value `convert-test s8` (show-bool (convert-test s8))
+let _ = convert-test `s8` s8
 
 let s9 = SExp-StdAtom.of-int 334
-let _ = info-value `convert-test s9` (show-bool (convert-test s9))
+let _ = convert-test `s9` s9
 
 let s10 = SExp-StdAtom.of-int (-123049586)
-let _ = info-value `convert-test s10` (show-bool (convert-test s10))
+let s10 = convert-test `s10` s10
 
 in
 
