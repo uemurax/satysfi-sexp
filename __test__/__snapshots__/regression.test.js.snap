@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Compiler outputs 1`] = `
+"[INFO] ========SExp-StdAtom========
+[INFO] s1 = abc
+[INFO] s2 = some-SYMBOL_name-4-2
+[INFO] s3 = symbol-name-1
+[INFO] ch-l3 =  symbol-name-2
+[INFO] s6 = 334
+[INFO] s7 = -13209542
+[INFO] ========SExp========
+[INFO] s8 = symbol-1
+[INFO] s9 = (symbol-1 (\\"strin\\\\\\"g\\\\\\"\\" -334))
+[INFO] s10 = (this (is \\"an\\") (S-expression 309 -334 \\"\\\\\\"!\\\\\\\\!\\\\\\"\\"))
+"
+`;
